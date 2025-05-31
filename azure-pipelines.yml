@@ -1,0 +1,25 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '6.0.x'
+
+- script: |
+    dotnet publish app -c Release -o out
+  displayName: 'Build App'
+
+- task: Docker@2
+  inputs:
+    containerRegistry: '<your-acr-connection>'
+    repository: 'internal-dev-platform/sample-app'
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
+    tags: '$(Build.BuildId)'
